@@ -37,4 +37,7 @@
     <!-- Messages -->
     <string name="set_permissions_in_settings">Go to Settings -> Apps and Notifications ->
         WorkManager Demo -> App Permissions and grant access to Storage.</string>
+    <string name="loading">Procesando...</string>
+    <string name="blurred_ok">Blur ok uri: %s</string>
+    <string name="blurred_error">Ups, ocurrió un error</string>
 </resources>

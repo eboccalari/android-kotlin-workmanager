@@ -18,11 +18,11 @@
 
 buildscript {
     ext.versions = [:]
-    versions.compileSdk = 32
+    versions.compileSdk = 33
     versions.minSdk = 16
-    versions.targetSdk = 30
+    versions.targetSdk = 33
     versions.kotlin = '1.6.10'
-    versions.work = "2.7.1"
+    versions.work = "2.8.0"
 
     repositories {
         google()
