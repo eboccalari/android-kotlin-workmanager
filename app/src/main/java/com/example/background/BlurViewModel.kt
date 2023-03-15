@@ -22,6 +22,7 @@ import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.work.Data
 import androidx.work.OneTimeWorkRequest
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
@@ -43,7 +44,9 @@ class BlurViewModel(application: Application) : ViewModel() {
      * @param blurLevel The amount to blur the image
      */
     internal fun applyBlur(blurLevel: Int) {
-        val oneTimeWorkRequest = OneTimeWorkRequest.Companion.from(BlurWorker::class.java)
+        val oneTimeWorkRequest = OneTimeWorkRequestBuilder<BlurWorker>()
+            .setInputData(createInputDataForUri())
+            .build()
         workManager.enqueue(oneTimeWorkRequest)
     }
 
@@ -58,14 +61,13 @@ class BlurViewModel(application: Application) : ViewModel() {
     private fun getImageUri(context: Context): Uri {
         val resources = context.resources
 
-        val imageUri = Uri.Builder()
+        return Uri.Builder()
             .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
             .authority(resources.getResourcePackageName(R.drawable.android_cupcake))
             .appendPath(resources.getResourceTypeName(R.drawable.android_cupcake))
             .appendPath(resources.getResourceEntryName(R.drawable.android_cupcake))
             .build()
 
-        return imageUri
     }
 
     internal fun setOutputUri(outputImageUri: String?) {
@@ -81,5 +83,13 @@ class BlurViewModel(application: Application) : ViewModel() {
                 throw IllegalArgumentException("Unknown ViewModel class")
             }
         }
+    }
+
+    private fun createInputDataForUri(): Data{
+        val builder = Data.Builder()
+        this.imageUri?.let {
+            builder.putString(KEY_IMAGE_URI, imageUri.toString())
+        }
+        return builder.build()
     }
 }
