@@ -16,6 +16,10 @@ class BlurWorker(context: Context, workerParams: WorkerParameters) : Worker(cont
         val appContext = applicationContext
         makeStatusNotification(appContext.getString(R.string.loading), appContext);
         val resourceUri = inputData.getString(KEY_IMAGE_URI)
+
+        // ADD THIS TO SLOW DOWN THE WORKER
+        sleep()
+
         return try {
             if(TextUtils.isEmpty(resourceUri)) {
                 throw IllegalArgumentException("Invalid input URI")
