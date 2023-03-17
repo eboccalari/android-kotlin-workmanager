@@ -35,8 +35,23 @@ class BlurActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityBlurBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         binding.goButton.setOnClickListener { viewModel.applyBlur(blurLevel) }
+        setupViewModel()
+    }
+
+    private fun setupViewModel(){
+        viewModel.outputWorkInfos.observe(this){
+            it?.let {
+                if(it.isNotEmpty()){
+                    val workInfo = it[0]
+                    if(workInfo.state.isFinished){
+                        showWorkFinished()
+                    }else{
+                        showWorkInProgress()
+                    }
+                }
+            }
+        }
     }
 
     /**

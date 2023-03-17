@@ -20,15 +20,14 @@ import android.app.Application
 import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.work.Data
-import androidx.work.OneTimeWorkRequest
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
+import androidx.work.*
 import com.example.background.workers.BlurWorker
 import com.example.background.workers.CleanUpWorker
 import com.example.background.workers.SaveImageToFileWorker
+import java.util.concurrent.TimeUnit
 import kotlin.coroutines.Continuation
 
 
@@ -36,11 +35,14 @@ class BlurViewModel(application: Application) : ViewModel() {
 
     private val workManager = WorkManager.getInstance(application)
 
-    internal var imageUri: Uri? = null
-    internal var outputUri: Uri? = null
+    private var imageUri: Uri? = null
+    private var outputUri: Uri? = null
+
+    var outputWorkInfos: LiveData<List<WorkInfo>>
 
     init {
         imageUri = getImageUri(application.applicationContext)
+        outputWorkInfos = workManager.getWorkInfosByTagLiveData(TAG_OUTPUT)
     }
     /**
      * Create the WorkRequest to apply the blur and save the resulting image
@@ -55,19 +57,25 @@ class BlurViewModel(application: Application) : ViewModel() {
             .build()
 
         val saveImageToFileWorkerRequest = OneTimeWorkRequestBuilder<SaveImageToFileWorker>()
+            .addTag(TAG_OUTPUT)
             .build()
 
-        var chain = workManager.beginWith(cleanUpWorkerRequest)
+        var chain = workManager.beginUniqueWork(
+            IMAGE_MANIPULATION_WORK_NAME,
+            ExistingWorkPolicy.REPLACE,
+            cleanUpWorkerRequest)
+
         chain = chain.then(blurWorkerRequest)
+
         for(i in 1 until blurLevel){
             val extraBlurWorkerRequest = OneTimeWorkRequestBuilder<BlurWorker>()
                 .build()
             chain = chain.then(extraBlurWorkerRequest)
         }
+
         chain = chain.then(saveImageToFileWorkerRequest)
+
         chain.enqueue()
-
-
 
     }
 
