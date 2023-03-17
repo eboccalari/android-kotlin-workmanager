@@ -36,8 +36,8 @@ class BlurViewModel(application: Application) : ViewModel() {
     private val workManager = WorkManager.getInstance(application)
 
     private var imageUri: Uri? = null
-    private var outputUri: Uri? = null
 
+    var outputUri: Uri? = null
     var outputWorkInfos: LiveData<List<WorkInfo>>
 
     init {
