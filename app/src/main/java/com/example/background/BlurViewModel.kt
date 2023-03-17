@@ -56,7 +56,14 @@ class BlurViewModel(application: Application) : ViewModel() {
             .setInputData(createInputDataForUri())
             .build()
 
+        /**
+         * When the device is not charging, it should suspend SaveImageToFileWorker,
+         * executing it only after that you plug it in.
+         */
+        val saveConstraints = Constraints.Builder().setRequiresCharging(true).build()
+
         val saveImageToFileWorkerRequest = OneTimeWorkRequestBuilder<SaveImageToFileWorker>()
+            .setConstraints(saveConstraints)
             .addTag(TAG_OUTPUT)
             .build()
 
@@ -101,6 +108,10 @@ class BlurViewModel(application: Application) : ViewModel() {
 
     internal fun setOutputUri(outputImageUri: String?) {
         outputUri = uriOrNull(outputImageUri)
+    }
+
+    internal fun cancelWorks(){
+        workManager.cancelUniqueWork(IMAGE_MANIPULATION_WORK_NAME)
     }
 
     class BlurViewModelFactory(private val application: Application) : ViewModelProvider.Factory {
